@@ -17,9 +17,9 @@ This repository contains the full code for the pathfinding logic, along with the
 
 Here’s a screenshot of the pathfinding visualization:
 
-![BGA Pathfinder Screenshot](./screenshot.png)
+![Figure_1](https://github.com/user-attachments/assets/b8cbf276-a3bb-4fbf-be9c-50f4bb4f886b)
 
-*Make sure to replace `screenshot.png` with your actual image if it’s saved under a different name or path.*
+
 
 ## Installation
 
