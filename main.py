@@ -1,30 +1,38 @@
-# main.py
 import numpy as np
-import matplotlib.pyplot as plt
-from routing.pathfinder import a_star
+from routing.pathfinder import create_layers_and_pads, place_outer_pads, place_inner_vias, a_star
+from routing.utils import plot_layers_with_paths, coord_to_grid
 
-# Create a 10x10 grid
-grid = np.zeros((10, 10), dtype=int)
+# Setup grid size
+rows, cols = 6, 6
+layers, pad_coords, size_mm = create_layers_and_pads(rows, cols)
 
-# Place a 2x2 obstacle in the center
-grid[4:6, 4:6] = 1
+# Place pads and vias
+place_outer_pads(layers[0], pad_coords, rows, cols)
+place_inner_vias(layers, pad_coords, rows, cols)
 
-# Define start and goal
-start = (0, 0)
-goal = (9, 9)
+# Routing parameters
+hub_coord_mm = (8.0, 8.0)
+hub_idx = coord_to_grid(*hub_coord_mm)
+paths_per_layer = [[] for _ in range(len(layers))]
 
-# Run A*
-path = a_star(grid, start, goal)
+# Route from all outer pads to hub on Layer 0
+for r, c, x_mm, y_mm in pad_coords:
+    if r == 0 or r == rows - 1 or c == 0 or c == cols - 1:
+        start_idx = coord_to_grid(x_mm, y_mm + 1.0)
+        # Mark start and goal as free (0)
+        layers[0][start_idx[1], start_idx[0]] = 0
+        layers[0][hub_idx[1], hub_idx[0]] = 0
+        path = a_star(layers[0], start_idx, hub_idx)
+        if path:
+            for x, y in path:
+                layers[0][y, x] = 4  # mark path on layer
+            paths_per_layer[0].append(path)
 
-# Visualize the result
-if path:
-    for x, y in path:
-        grid[y][x] = 2  # Mark path on grid
-
-    # Visual plot
-    plt.imshow(grid, cmap="viridis", origin="lower")
-    plt.title("A* Pathfinding Demo")
-    plt.colorbar(label="0=Free, 1=Obstacle, 2=Path")
-    plt.show()
-else:
-    print("No path found.")
+# Visualize results
+plot_layers_with_paths(
+    layers,
+    paths_per_layer,
+    link_colors=["cyan", "orange", "lime"],
+    base_colors=["blue", "red", "magenta"],
+    titles=["Layer 1 (Top)", "Layer 3", "Layer 4"]
+)
