@@ -31,16 +31,17 @@ def plot_layers_with_paths(layers, paths, link_colors, base_colors, titles):
     line_colors = ["blue", "red", "magenta"]
     dot_colors = ["green"] * 3
 
-    for i, (layer, path, link_color, base_color, title) in enumerate(zip(layers, paths, link_colors, base_colors, titles)):
+    for i, (layer, path_list, link_color, base_color, title) in enumerate(zip(layers, paths, link_colors, base_colors, titles)):
         ax = axs[i]
         ax.set_title(title, fontsize=12)
         ax.imshow(layer, cmap="Greys", origin="lower")
 
-        if path:
-            px, py = zip(*path)
-            fx, fy = zip(*[grid_to_coord(x, y) for x, y in zip(px, py)])
-            ax.plot(fx, fy, color=line_colors[i], linewidth=1.5)
-            ax.scatter(fx, fy, color=dot_colors[i], s=6)
+        for path in path_list:
+            if path:  # Skip None paths
+                px, py = zip(*path)
+                fx, fy = zip(*[grid_to_coord(x, y) for x, y in zip(px, py)])
+                ax.plot(fx, fy, color=line_colors[i], linewidth=1.5)
+                ax.scatter(fx, fy, color=dot_colors[i], s=6)
 
         ax.set_xticks([])
         ax.set_yticks([])
